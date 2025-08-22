@@ -15,6 +15,7 @@ In a fast-paced world, professionals and students often lack the time to watch l
 * **Libraries:** `google-generativeai`, `youtube-transcript-api`
 * **Environment:** Google Colab
 
-## Demo
-*(A GIF or screenshot of the final project running will go here later!)*
+![Project Demo](https://github.com/pitchaiah62/youtube-video-summarizer/blob/main/demo.gif)
+
+
 
