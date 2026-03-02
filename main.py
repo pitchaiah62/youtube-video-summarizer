@@ -1,55 +1,48 @@
-# --- FINAL PROJECT: YouTube Video Summarizer ---
-# This is the complete script that brings everything together.
+import streamlit as st
+import google.generativeai as genai
+from youtube_transcript_api import YouTubeTranscriptApi
 
-# == PART 1: IMPORTS & SETUP ==
-# We would have our imports and API key configuration here.
-# import google.generativeai as genai
-# from youtube_transcript_api import YouTubeTranscriptApi
-# genai.configure(api_key="YOUR_API_KEY")
+st.set_page_config(page_title="YouTube Video Summarizer", page_icon="🎬")
 
+st.title("🎬 YouTube Video Summarizer")
+st.write("Paste any YouTube link and get an AI summary instantly!")
 
-# == PART 2: HELPER FUNCTIONS ==
+api_key = st.text_input("Enter your Gemini API Key", type="password")
+youtube_url = st.text_input("Enter YouTube Video URL")
 
-def get_transcript(video_url):
+def get_video_id(url):
+    if "v=" in url:
+        return url.split("v=")[1].split("&")[0]
+    elif "youtu.be/" in url:
+        return url.split("youtu.be/")[1].split("?")[0]
+    return None
+
+def get_transcript(video_id):
+    transcript = YouTubeTranscriptApi.get_transcript(video_id)
+    return " ".join([t["text"] for t in transcript])
+
+def summarize(transcript, api_key):
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-pro")
+    prompt = f"""
+    You are an expert video summarizer.
+    Summarize this YouTube transcript in clear bullet points.
+    Cover all key points and main ideas.
+    Transcript: {transcript}
     """
-    This function would get the transcript.
-    Since the library is broken, we will simulate its success.
-    """
-    print(f"Fetching transcript for {video_url}...")
-    # In the real code, the call to the library would be here.
-    simulated_transcript_text = "This is a long, simulated transcript text from the YouTube video..."
-    print("✅ Transcript ready!")
-    return simulated_transcript_text
+    response = model.generate_content(prompt)
+    return response.text
 
-def summarize_text(transcript):
-    """
-    This function would call the Gemini API to get a summary.
-    Since the API key is not working, we will simulate its success.
-    """
-    print("Sending transcript to the AI for summarization...")
-    # In the real code, the call to the Gemini model would be here.
-    simulated_summary = "• This is the first key point from the AI summary.\n• This is the second key point.\n• This is the third key point."
-    print("✅ Summary received!")
-    return simulated_summary
-
-
-# == PART 3: MAIN PROGRAM LOGIC ==
-
-print("--- YouTube Video Summarizer ---")
-# Get the video URL from the user
-url = input("Please enter the YouTube video URL: ")
-
-# Step 1: Get the transcript using our function
-transcript_text = get_transcript(url)
-
-# Step 2: If we got a transcript, summarize it
-if transcript_text:
-    summary = summarize_text(transcript_text)
-    # Step 3: Print the final summary for the user
-    if summary:
-        print("\n--- AI-Generated Summary ---")
-        print(summary)
-        print("--------------------------")
-else:
-    print("Could not process the video.")
-
+if st.button("Summarize Video 🚀"):
+    if not api_key or not youtube_url:
+        st.warning("Please enter both API key and YouTube URL!")
+    else:
+        with st.spinner("Generating summary..."):
+            try:
+                video_id = get_video_id(youtube_url)
+                transcript = get_transcript(video_id)
+                summary = summarize(transcript, api_key)
+                st.success("Done!")
+                st.markdown(summary)
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
