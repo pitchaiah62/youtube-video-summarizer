@@ -18,9 +18,9 @@ def get_video_id(url):
     return None
 
 def get_transcript(video_id):
-    transcript = YouTubeTranscriptApi.get_transcript(video_id)
-    return " ".join([t["text"] for t in transcript])
-
+    ytt = YouTubeTranscriptApi()
+    transcript = ytt.fetch(video_id)
+    return " ".join([t.text for t in transcript])
 def summarize(transcript, api_key):
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-pro")
