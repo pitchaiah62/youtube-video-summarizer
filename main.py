@@ -1,41 +1,48 @@
+
 import streamlit as st
 import google.generativeai as genai
 
 st.set_page_config(page_title="YouTube Video Summarizer", page_icon="🎬")
 
 st.title("🎬 YouTube Video Summarizer")
-st.write("Paste your YouTube transcript and get an AI summary instantly!")
+st.write("Paste any YouTube link and get an AI summary instantly!")
 
 api_key = st.text_input("Enter your Gemini API Key", type="password")
+youtube_url = st.text_input("Enter YouTube Video URL")
 
-st.markdown("**How to get transcript:**")
-st.markdown("1. Open any YouTube video")
-st.markdown("2. Click '...' → 'Show transcript'")
-st.markdown("3. Copy all text and paste below")
-
-transcript_text = st.text_area("Paste YouTube Transcript Here", height=200)
-
-def summarize(transcript, api_key):
+def summarize(url, api_key):
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-1.5-flash")
     prompt = f"""
-    You are an expert video summarizer.
-    Summarize this YouTube transcript in clear bullet points.
-    Cover all key points and main ideas.
-    Keep it concise and easy to understand.
-    Transcript: {transcript}
+    Please watch and summarize this YouTube video: {url}
+    
+    Provide:
+    ## 🎯 Main Topic
+    What is this video about in 2 sentences.
+    
+    ## 📌 Key Points
+    5 most important bullet points from the video.
+    
+    ## 💡 Key Takeaways
+    3 actionable takeaways the viewer should remember.
+    
+    ## 📝 Overall Summary
+    A short paragraph summarizing everything.
     """
     response = model.generate_content(prompt)
     return response.text
 
 if st.button("Summarize Video 🚀"):
-    if not api_key or not transcript_text:
-        st.warning("Please enter both API key and transcript!")
+    if not api_key or not youtube_url:
+        st.warning("Please enter both API key and YouTube URL!")
     else:
-        with st.spinner("Generating summary..."):
+        with st.spinner("AI is watching and summarizing the video..."):
             try:
-                summary = summarize(transcript_text, api_key)
-                st.success("Summary Generated!")
+                summary = summarize(youtube_url, api_key)
+                st.success("Summary Generated! ✅")
                 st.markdown(summary)
             except Exception as e:
                 st.error(f"Error: {str(e)}")
+
+st.markdown("---")
+st.markdown("Built with ❤️ by Pitchaiah | Powered by Google Gemini AI")
