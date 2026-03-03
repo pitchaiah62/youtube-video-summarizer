@@ -18,12 +18,17 @@ def get_video_id(url):
     return None
 
 def get_transcript(video_id):
-    ytt = YouTubeTranscriptApi()
-    transcript = ytt.fetch(video_id)
-    return " ".join([t.text for t in transcript])
+    try:
+        ytt = YouTubeTranscriptApi()
+        transcript = ytt.fetch(video_id)
+        return " ".join([t.text for t in transcript])
+    except Exception:
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        return " ".join([t["text"] for t in transcript])
+
 def summarize(transcript, api_key):
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-pro")
+    model = genai.GenerativeModel("gemini-1.5-flash")
     prompt = f"""
     You are an expert video summarizer.
     Summarize this YouTube transcript in clear bullet points.
